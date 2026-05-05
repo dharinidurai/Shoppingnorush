@@ -16,9 +16,16 @@ const cached: Cached = (global as any)._mongo || { client: null, clientPromise: 
 
 if (!cached.clientPromise) {
   if (!uri) {
-    // If no URI, we return a promise that rejects when awaited.
-    // This prevents module evaluation from throwing at build time.
-    cached.clientPromise = Promise.reject(new Error('Please define MONGODB_URI in your environment variables'))
+    // If no URI, we return a promise that will only throw if awaited.
+    // This prevents the build process from logging evaluation errors.
+    cached.clientPromise = (async () => {
+      // During build, we might not have the URI, so we just return null or throw later.
+      // If this is awaited at runtime, it will throw.
+      if (!uri) {
+        throw new Error('Please define MONGODB_URI in your environment variables')
+      }
+      return new MongoClient(uri).connect()
+    })()
   } else {
     const client = new MongoClient(uri)
     cached.client = client
