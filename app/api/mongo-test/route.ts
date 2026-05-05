@@ -6,6 +6,9 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const client = await clientPromise
+    if (!client) {
+      throw new Error('MONGODB_URI is not defined in environment variables')
+    }
     const db = client.db('shoop')
     const collections = await db.listCollections().toArray()
     return NextResponse.json({ ok: 1, collections })

@@ -6,6 +6,9 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const client = await clientPromise
+    if (!client) {
+      throw new Error('MONGODB_URI is not defined in environment variables')
+    }
     const db = client.db('shoop')
     const orders = await db.collection('orders').find().toArray()
     return NextResponse.json(orders)
@@ -18,6 +21,9 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     const client = await clientPromise
+    if (!client) {
+      throw new Error('MONGODB_URI is not defined in environment variables')
+    }
     const db = client.db('shoop')
     const res = await db.collection('orders').insertOne(data)
     return NextResponse.json({ insertedId: res.insertedId.toString() })
