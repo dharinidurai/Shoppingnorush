@@ -1,9 +1,6 @@
 import { MongoClient } from 'mongodb'
 
 const uri = process.env.MONGODB_URI
-if (!uri) {
-  throw new Error('Please define MONGODB_URI in a .env.local file')
-}
 
 type Cached = {
   client: MongoClient | null
@@ -18,9 +15,15 @@ declare global {
 const cached: Cached = (global as any)._mongo || { client: null, clientPromise: null }
 
 if (!cached.clientPromise) {
-  const client = new MongoClient(uri)
-  cached.client = client
-  cached.clientPromise = client.connect()
+  if (!uri) {
+    // If no URI, we return a promise that rejects when awaited.
+    // This prevents module evaluation from throwing at build time.
+    cached.clientPromise = Promise.reject(new Error('Please define MONGODB_URI in your environment variables'))
+  } else {
+    const client = new MongoClient(uri)
+    cached.client = client
+    cached.clientPromise = client.connect()
+  }
   ;(global as any)._mongo = cached
 }
 
