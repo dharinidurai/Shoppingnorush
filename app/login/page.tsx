@@ -12,13 +12,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const API_BASE = (process.env.NEXT_PUBLIC_API_URL as string) || 'http://localhost:5000';
 
   const handleLogin = async () => {
     setError('');
     setIsLoggingIn(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -53,7 +54,7 @@ export default function LoginPage() {
     // Simulate NFC tap - in a real app this would interface with WebNFC or a hardware listener
     setTimeout(async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/nfc-login', {
+        const response = await fetch(`${API_BASE}/api/auth/nfc-login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nfcToken: loginRole === 'admin' ? 'ADMIN_NFC_001' : 'USER_NFC_001' }),
